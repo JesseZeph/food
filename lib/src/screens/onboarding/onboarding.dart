@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:food_delivery_app/core/constants.dart';
 import 'package:food_delivery_app/src/screens/authentication/login.dart';
+import 'package:food_delivery_app/src/screens/onboarding/components/custom_scroll.dart';
 import 'package:food_delivery_app/src/screens/onboarding/pages/first.dart';
 import 'package:food_delivery_app/src/screens/onboarding/pages/second.dart';
 import 'package:food_delivery_app/src/screens/onboarding/pages/third.dart';
@@ -9,6 +10,7 @@ import 'package:food_delivery_app/src/widgets/animated_button.dart';
 import 'package:food_delivery_app/src/widgets/custom_text.dart';
 import 'package:food_delivery_app/src/widgets/roundedbutton.dart';
 import 'package:food_delivery_app/utils/app_color.dart';
+import 'package:food_delivery_app/utils/extentions.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -21,7 +23,6 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
 
   final List<Widget> _pages = [
     const FirstScreen(),
@@ -29,22 +30,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
     const ThirdScreen(),
   ];
 
-  void _nextPage() {
-    if (_currentPage < _pages.length) {
-      setState(() {
-        _currentPage++;
-      });
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Login()),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.onBoardProvider.setPageCount(_pages.length);
+    });
   }
 
   @override
@@ -62,18 +53,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
             SizedBox(
               height: height * 0.7,
               child: PageView(
+                physics: CustomScrollPhysics(
+                    allowScrolling: context.onBoardProvider.isLastPage),
                 controller: _pageController,
                 onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
+                  context.onBoardProvider.setPage(index);
+                  if (index == _pages.length - 1) {
+                    setState(() {});
+                  }
                 },
                 children: _pages,
               ),
             ),
             SmoothPageIndicator(
               controller: _pageController,
-              count: 3,
+              count: _pages.length,
               effect: const WormEffect(
                 dotColor: AppColor.offOrange,
                 activeDotColor: AppColor.darkOrange,
@@ -85,12 +79,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
             SizedBox(height: 60.h),
             AnimatedButton(
               onTap: () {
-                _nextPage();
+                if (context.onBoardProvider.isLastPage) {
+                  Get.offAll(() => const Login());
+                } else {
+                  context.onBoardProvider.nextPage();
+                  _pageController.animateToPage(
+                    context.onBoardProvider.currentPage,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
               },
               child: CustomButton(
                 size: 18,
                 title:
-                    _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                    context.onBoardProvider.isLastPage ? 'Get Started' : 'Next',
               ),
             ),
             TextButton(

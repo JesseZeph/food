@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:food_delivery_app/core/data/data_provider.dart';
 import 'package:food_delivery_app/core/data/theme_provider.dart';
+import 'package:food_delivery_app/src/screens/onboarding/provider/onboard_provider.dart';
 import 'package:food_delivery_app/src/screens/splashscreen/splashscreen.dart';
 import 'package:food_delivery_app/src/screens/splashscreen/provider/splash_provider.dart';
 import 'package:food_delivery_app/utils/extentions.dart';
@@ -22,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => SplashScreenProvider()),
         ChangeNotifierProvider(
             create: (context) => ThemeProvider(context.dataProvider)),
+        ChangeNotifierProvider(create: (context) => OnboardProvider()),
       ],
       child: const MyApp(),
     ),
