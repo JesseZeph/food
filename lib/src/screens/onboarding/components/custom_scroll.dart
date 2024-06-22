@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
-class CustomScrollPhysics extends ScrollPhysics {
-  final bool allowScrolling;
+class LockScrollPhysics extends ScrollPhysics {
+  final bool lock;
 
-  const CustomScrollPhysics({super.parent, required this.allowScrolling});
+  const LockScrollPhysics({super.parent, required this.lock});
 
   @override
-  CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return CustomScrollPhysics(
-        parent: buildParent(ancestor), allowScrolling: allowScrolling);
+  LockScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return LockScrollPhysics(parent: buildParent(ancestor), lock: lock);
   }
 
   @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) {
-    return allowScrolling;
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    if (lock && offset < 0) {
+      return 0;
+    }
+    return super.applyPhysicsToUserOffset(position, offset);
   }
 }

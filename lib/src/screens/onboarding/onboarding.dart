@@ -53,14 +53,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
             SizedBox(
               height: height * 0.7,
               child: PageView(
-                physics: CustomScrollPhysics(
-                    allowScrolling: context.onBoardProvider.isLastPage),
+                physics: LockScrollPhysics(
+                  lock: context.onBoardProvider.isLastPage,
+                  parent: const AlwaysScrollableScrollPhysics(),
+                ),
                 controller: _pageController,
                 onPageChanged: (index) {
                   context.onBoardProvider.setPage(index);
-                  if (index == _pages.length - 1) {
-                    setState(() {});
-                  }
+                  setState(() {});
                 },
                 children: _pages,
               ),
